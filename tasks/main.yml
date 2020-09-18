@@ -1,0 +1,32 @@
+---
+- name: "Lighttpd | Install |"
+  include_tasks: "{{ ansible_os_family }}_install.yaml"
+
+- name: "Lighttpd | Files and directories |"
+  include_tasks: "{{ ansible_os_family }}_files_dirs.yaml"
+
+- name: "Lighttpd | Prepare LetsEncrypt certificates |"
+  include_role:
+    name: letsencrypt-certbot
+  vars:
+    _domains: "{{ lighttpd_vhosts | selectattr('certificates', 'equalto', 'letsencrypt') | list }}"
+    _webservice: "{{ lighttpd[ ansible_os_family ]['service'] }}"
+  when: lighttpd_vhosts | selectattr('certificates', 'equalto', 'letsencrypt') | list | length > 0
+
+- name: Lighttpd | Vhosts configuration
+  template:
+    src: vhost.conf.j2
+    dest: "{{ lighttpd[ ansible_os_family ]['vhosts_configs'] }}/{{ _vhost.name }}.conf"
+    mode: 644
+    owner: root
+    group: root
+  notify: "Lighttpd | Restart"
+  loop: "{{ lighttpd_vhosts }}"
+  loop_control:
+    loop_var: _vhost
+
+- name: Lighttpd | Service
+  service:
+    name: "{{ lighttpd[ ansible_os_family ]['service'] }}"
+    enabled: True
+    state: started

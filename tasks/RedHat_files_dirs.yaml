@@ -1,0 +1,62 @@
+---
+- name: "Lighttpd | vhosts configuration directory |"
+  file:
+    path: "{{ lighttpd[ ansible_os_family ]['vhosts_configs'] }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: "Lighttpd | vhosts data directory |"
+  file:
+    path: "{{ lighttpd['vhosts_dir'] }}/{{ vhost.name }}/htdocs"
+    state: directory
+    owner: lighttpd
+    group: lighttpd
+    mode: '0755'
+  loop: "{{ lighttpd_vhosts }}"
+  loop_control:
+    loop_var: vhost
+
+- name: "Lighttpd | vhosts logs directory |"
+  file:
+    path: "{{ lighttpd['vhosts_dir'] }}/{{ item.name }}/logs"
+    state: directory
+    owner: lighttpd
+    group: lighttpd
+    mode: '0755'
+  loop: "{{ lighttpd_vhosts }}"
+
+- name: "Lighttpd | Logs symlink |"
+  file:
+    src: "{{ lighttpd['vhosts_dir'] }}/{{ item.name }}/logs"
+    dest: "/var/log/lighttpd/{{ item.name }}"
+    state: link
+    owner: lighttpd
+    group: lighttpd
+    force: yes
+  loop: "{{ lighttpd_vhosts }}"
+
+- name: "Lighttpd | Default document root |"
+  file:
+    path: "{{ lighttpd[ ansible_os_family ]['document_root'] }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: "Lighttpd | .well-known |"
+  file:
+    path: "{{ lighttpd[ ansible_os_family ]['document_root'] }}/.well-known"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: "Lighttpd | Logrotate |"
+  copy:
+    src: lighttpd.logrotate
+    dest: /etc/logrotate.d/lighttpd
+    owner: root
+    group: root
+    mode: '0644'

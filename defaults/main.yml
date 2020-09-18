@@ -1,0 +1,18 @@
+---
+# defaults file for lighttpd-server
+lighttpd:
+  vhosts_dir: '/var/www/domains'
+  RedHat:
+    service: lighttpd.service
+    packages:
+      - lighttpd
+      - lighttpd-fastcgi
+      - php-fpm
+    certs_dir: '/etc/pki/tls/certs'
+    private_dir: '/etc/pki/tls/private'
+    document_root: '/var/www/lighttpd'
+    group: 'lighttpd'
+    server_root: '/etc/lighttpd'
+    user: 'lighttpd'
+    vhosts_configs: '/etc/lighttpd/vhosts.d'
+    

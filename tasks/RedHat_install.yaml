@@ -1,0 +1,5 @@
+---
+- name: Install Lighttpd
+  yum:
+    name: "{{ lighttpd[ ansible_os_family ]['packages'] }}"
+    state: "{{ packages_state | default('present') }}"

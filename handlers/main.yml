@@ -1,0 +1,6 @@
+---
+# handlers file for lighttpd-server
+- name: "Lighttpd | Restart"
+  service:
+    name: "{{ lighttpd[ ansible_os_family ]['service'] }}"
+    state: restarted
