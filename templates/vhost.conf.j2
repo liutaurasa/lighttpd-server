@@ -1,7 +1,7 @@
 $SERVER["socket"] == ":80" {
     $HTTP["host"] =~ "{{ _vhost.name }}" {
         server.name = "{{ _vhost.name }}" 
-        server.errorlog = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/logs/error.log"
+        errorlog.filename = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/logs/error.log"
         accesslog.filename = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/logs/access.log"
         
         alias.url += ("/.well-known/" => "/var/www/lighttpd/.well-known/")
@@ -18,9 +18,14 @@ $SERVER["socket"] == ":80" {
                         "port" => {{ _vhost.proxy.port }}
                     ))
             )
+            setenv.add-request-header  = (
+                "X-Forwarded-Proto" => "https",
+                "X-Forwarded-Host" => "{{ _vhost.name}}",
+                "X-Forwarded-Port" => "443"
+            )
         }
     {% else %}
-        server.document-root = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/htdocs/"
+        server.document-root = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/{{ lighttpd['vhosts_htdocs'] }}/htdocs/"
     {% endif -%}
 {% endif -%}
     }
@@ -34,7 +39,7 @@ $SERVER["socket"] == ":443" {
         ssl.pemfile = "/etc/letsencrypt/live/{{ _vhost.name }}/bundle.pem" # Combined Certificate
         ssl.ca-file = "/etc/letsencrypt/live/{{ _vhost.name }}/chain.pem" # Root CA
         server.name = "{{ _vhost.name }}" 
-        server.errorlog = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/logs/error_ssl.log"
+        errorlog.filename = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/logs/error_ssl.log"
         accesslog.filename = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/logs/access_ssl.log"
         
         alias.url += ("/.well-known/" => "/var/www/lighttpd/.well-known/")
@@ -47,9 +52,14 @@ $SERVER["socket"] == ":443" {
                         "port" => {{ _vhost.proxy.port }}
                     ))
             )
+            setenv.add-request-header  = (
+                "X-Forwarded-Proto" => "https",
+                "X-Forwarded-Host" => "{{ _vhost.name}}",
+                "X-Forwarded-Port" => "443"
+            )
         }
 {% else %}
-        server.document-root = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/htdocs/"
+        server.document-root = "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/{{ lighttpd['vhosts_htdocs'] }}/htdocs/"
 {% endif %}
     }
 }

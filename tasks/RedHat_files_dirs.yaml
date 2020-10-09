@@ -7,16 +7,28 @@
     group: root
     mode: '0755'
 
-- name: "Lighttpd | vhosts data directory |"
+- name: "Lighttpd | vhosts public directory |"
   file:
-    path: "{{ lighttpd['vhosts_dir'] }}/{{ vhost.name }}/htdocs"
+    path: "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/{{ lighttpd['vhosts_htdocs'] }}"
     state: directory
-    owner: lighttpd
+    owner: "{{ _vhost.developer | default(omit) }}"
     group: lighttpd
-    mode: '0755'
+    mode: '02775'
+    recurse: True
   loop: "{{ lighttpd_vhosts }}"
   loop_control:
-    loop_var: vhost
+    loop_var: _vhost
+
+- name: "Lighttpd | vhosts htdocs directory |"
+  file:
+    path: "{{ lighttpd['vhosts_dir'] }}/{{ _vhost.name }}/{{ lighttpd['vhosts_htdocs'] }}/htdocs"
+    state: directory
+    owner: "{{ _vhost.developer | default(omit) }}"
+    group: lighttpd
+    mode: '02775'
+  loop: "{{ lighttpd_vhosts }}"
+  loop_control:
+    loop_var: _vhost
 
 - name: "Lighttpd | vhosts logs directory |"
   file:
